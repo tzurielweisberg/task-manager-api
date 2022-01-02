@@ -1,27 +1,33 @@
 # This workflow will do a clean install of node dependencies, cache/restore them, build the source code and run tests across different versions of node
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
-name: Node.js CI
+#name: Node.js CI
+#
+name: build
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-image:
-  name: atlassian/default-image:2
-pipelines:
-  default:
-    - step:
-        services:
-          - docker
-        script:
-          - pipe: aquasecurity/trivy-pipe:1.0.0
-            variables:
-              scanType: "config"
-              hideProgress: "false"
-              format: "table"
-              exitCode: 1
-              ignoreUnfixed: "true"
-              severity: "CRITICAL,HIGH"
-              AQUA_KEY: $AQUA_KEY
-              AQUA_SECRET: $AQUA_SECRET
-              TRIVY_RUN_AS_PLUGIN: 'aqua'
+      - name: Run Trivy vulnerability scanner in IaC mode
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          hide-progress: false
+          format: 'table'
+          exit-code: '1'
+         env:
+          AQUA_KEY: ${{ secrets.AQUA_KEY }}
+          AQUA_SECRET: ${{ secrets.AQUA_SECRET }}
+          TRIVY_RUN_AS_PLUGIN: 'aqua'
               
               
 on:
